@@ -171,14 +171,14 @@ static void update_all_backgrounds_for_mode() {
 
     std::string navi_bg_path =  _is_night_mode ?
             "/HomePage/navi_bg_night.png" : "/HomePage/navi_bg.png";
-    std::string navi_icon_music_path = "/HomePage/navi_icon_music_n.png";
-    std::string navi_icon_video_path = "/HomePage/navi_icon_video_n.png";
+    std::string navi_icon_tf_path = "/HomePage/navi_icon_tf_n.png";        // TF Card 按钮图标
+    std::string navi_icon_reverse_path = "/HomePage/navi_icon_video_n.png"; // 倒车设置图标（暂用 video 图标，待替换）
     std::string navi_icon_audio_path = "/HomePage/navi_icon_audio_n.png";
     std::string navi_icon_set_path = "/HomePage/navi_icon_settings_n.png";
 	if (mnaviBgPtr) {
 		mnaviBgPtr->setBackgroundPic(CONFIGMANAGER->getResFilePath(navi_bg_path.c_str()).c_str());
-		mleftMusicButtonPtr->setBackgroundPic(CONFIGMANAGER->getResFilePath(navi_icon_music_path.c_str()).c_str());
-		mleftVideoButtonPtr->setBackgroundPic(CONFIGMANAGER->getResFilePath(navi_icon_video_path.c_str()).c_str());
+		mleftTFCardButtonPtr->setBackgroundPic(CONFIGMANAGER->getResFilePath(navi_icon_tf_path.c_str()).c_str());
+		mleftReverseSettingButtonPtr->setBackgroundPic(CONFIGMANAGER->getResFilePath(navi_icon_reverse_path.c_str()).c_str());
 		mleftAudioButtonPtr->setBackgroundPic(CONFIGMANAGER->getResFilePath(navi_icon_audio_path.c_str()).c_str());
 		mleftSetButtonPtr->setBackgroundPic(CONFIGMANAGER->getResFilePath(navi_icon_set_path.c_str()).c_str());
 	}
@@ -1020,8 +1020,8 @@ static void onUI_hide() {
 
 
 	mnaviBgPtr->setBackgroundPic(NULL);
-	mleftMusicButtonPtr->setBackgroundPic(NULL);
-	mleftVideoButtonPtr->setBackgroundPic(NULL);
+	mleftTFCardButtonPtr->setBackgroundPic(NULL);
+	mleftReverseSettingButtonPtr->setBackgroundPic(NULL);
 	mleftAudioButtonPtr->setBackgroundPic(NULL);
 	mleftSetButtonPtr->setBackgroundPic(NULL);
 
@@ -1076,8 +1076,8 @@ static void onUI_quit() {
 	miconBrightnessTextViewPtr->setBackgroundPic(NULL);
 
 	mnaviBgPtr->setBackgroundPic(NULL);
-	mleftMusicButtonPtr->setBackgroundPic(NULL);
-	mleftVideoButtonPtr->setBackgroundPic(NULL);
+	mleftTFCardButtonPtr->setBackgroundPic(NULL);
+	mleftReverseSettingButtonPtr->setBackgroundPic(NULL);
 	mleftAudioButtonPtr->setBackgroundPic(NULL);
 	mleftSetButtonPtr->setBackgroundPic(NULL);
 	_is_music_info_cached = false;
@@ -1651,27 +1651,22 @@ static bool onButtonClick_audiooutput3Button(ZKButton *pButton) {
     LOGD(" ButtonClick audiooutput3Button !!!\n");
     return false;
 }
-static bool onButtonClick_leftMusicButton(ZKButton *pButton) {
-    LOGD(" ButtonClick leftMusicButton !!!\n");
+static bool onButtonClick_leftTFCardButton(ZKButton *pButton) {
+    LOGD(" ButtonClick leftTFCardButton !!!\n");
     if (lk::is_connected()) {
 		if (mlinkTipsWindowPtr) {
 			mlinkTipsWindowPtr->showWnd();
 		}
 		return false;
 	}
-	EASYUICONTEXT->openActivity("musicActivity");
+	EASYUICONTEXT->openActivity("tfcardActivity");
     return false;
 }
 
-static bool onButtonClick_leftVideoButton(ZKButton *pButton) {
-    LOGD(" ButtonClick leftVideoButton !!!\n");
-    if (lk::is_connected()) {
-		if (mlinkTipsWindowPtr) {
-			mlinkTipsWindowPtr->showWnd();
-		}
-		return false;
-	}
-	EASYUICONTEXT->openActivity("videoActivity");
+static bool onButtonClick_leftReverseSettingButton(ZKButton *pButton) {
+    LOGD(" ButtonClick leftReverseSettingButton !!!\n");
+    // 倒车设置不受互联状态限制
+	EASYUICONTEXT->openActivity("setreverseActivity");
     return false;
 }
 
