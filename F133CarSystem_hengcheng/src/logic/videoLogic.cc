@@ -400,7 +400,31 @@ static void onUI_init(){
  */
 static void onUI_intent(const Intent *intentPtr) {
     if (intentPtr != NULL) {
-        //TODO
+        // 从 tfcardActivity 传入的播放参数
+        std::string idx_str = intentPtr->getExtra("play_index");
+        std::string sto_str = intentPtr->getExtra("storage_type");
+        if (!idx_str.empty()) {
+            int play_idx = atoi(idx_str.c_str());
+            storage_type_e sto = E_STORAGE_TYPE_SD;
+            if (!sto_str.empty()) {
+                sto = (storage_type_e)atoi(sto_str.c_str());
+            }
+            LOGD("[video] onUI_intent: play_index=%d, storage=%d", play_idx, sto);
+
+            int list_size = media::get_video_list_size(sto);
+            if (play_idx >= 0 && play_idx < list_size) {
+                _s_play_index = play_idx;
+                _s_play_storage = sto;
+                _s_select_storage = sto;
+                std::string file = media::get_video_file(sto, play_idx);
+                LOGD("[video] onUI_intent: playing %s", file.c_str());
+                video_ctrl_play(file.c_str());
+                video_enter_type = E_VIDEO_ENTER_FROM_LIST;
+                mode::set_switch_mode(E_SWITCH_MODE_GOBACK);
+            } else {
+                LOGD("[video] onUI_intent: play_index %d out of range (size=%d)", play_idx, list_size);
+            }
+        }
     }
 }
 

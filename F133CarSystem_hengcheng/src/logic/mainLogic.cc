@@ -115,11 +115,6 @@ static bool _is_in_sub_pages = false; // 是否在子页面中
 // **内存优化:添加状态管理变量**
 static bool _is_in_reverse_mode = false;      // 倒车状态
 static bool _is_ui_update_paused = false;     // UI更新暂停状态
-static bool _is_music_info_cached = false;    // 音乐信息缓存状态
-static std::string _cached_title = "";        // 缓存的音乐标题
-static std::string _cached_artist = "";       // 缓存的艺术家信息
-static std::string _last_play_file = "";      // 上次播放的文件
-static bool _background_resources_loaded = false; // 背景资源加载状态
 static bool _is_exiting_reverse = false;      // 标记是否正在从倒车模式退出
 
 // 白天/黑夜模式状态变量
@@ -227,23 +222,14 @@ static void update_all_backgrounds_for_mode() {
     // 6. musicPage2Button - dock_music
     std::string music_path = _is_night_mode ?
         "/HomePage/dock_music_n_night.png" : "/HomePage/dock_music_n.png";
-    if (mmusicPage2ButtonPtr) {
-        mmusicPage2ButtonPtr->setBackgroundPic(CONFIGMANAGER->getResFilePath(music_path.c_str()).c_str());
-    }
 
     // 7. videoPage2Button - dock_video
     std::string video_path = _is_night_mode ?
         "/HomePage/dock_video_n_night.png" : "/HomePage/dock_video_n.png";
-    if (mvideoPage2ButtonPtr) {
-        mvideoPage2ButtonPtr->setBackgroundPic(CONFIGMANAGER->getResFilePath(video_path.c_str()).c_str());
-    }
 
     // 8. albumPage2Button - dock_picture
     std::string picture_path = _is_night_mode ?
         "/HomePage/dock_picture_n_night.png" : "/HomePage/dock_picture_n.png";
-    if (malbumPage2ButtonPtr) {
-        malbumPage2ButtonPtr->setBackgroundPic(CONFIGMANAGER->getResFilePath(picture_path.c_str()).c_str());
-    }
 
     // 9. settingPage2Button - dock_settings
 //    std::string settings_path = _is_night_mode ?
@@ -254,29 +240,20 @@ static void update_all_backgrounds_for_mode() {
 
     std::string airplay_path = _is_night_mode ?
         "/HomePage/dock_airplay_n_night.png" : "/HomePage/dock_airplay_n.png";
-    if (mairplayPage2ButtonPtr) {
-        mairplayPage2ButtonPtr->setBackgroundPic(CONFIGMANAGER->getResFilePath(airplay_path.c_str()).c_str());
-    }
 
     // 11. aicastPage2Button
     std::string aicast_path = _is_night_mode ?
         "/HomePage/dock_aicast_n_night.png" : "/HomePage/dock_aicast_n.png";
-    if (maicastPage2ButtonPtr) {
-        maicastPage2ButtonPtr->setBackgroundPic(CONFIGMANAGER->getResFilePath(aicast_path.c_str()).c_str());
-    }
 
     // 12. miracastPage2Button
     std::string miracast_path = _is_night_mode ?
         "/HomePage/dock_miracast_n_night.png" : "/HomePage/dock_miracast_n.png";
-    if (mmiracastPage2ButtonPtr) {
-        mmiracastPage2ButtonPtr->setBackgroundPic(CONFIGMANAGER->getResFilePath(miracast_path.c_str()).c_str());
-    }
 
     // 13. bluetoothPage2Button
     std::string bluetooth_path = _is_night_mode ?
         "/HomePage/dock_bt_n_night.png" : "/HomePage/dock_bt_n.png";
-    if (mbluetoothPage2ButtonPtr) {
-        mbluetoothPage2ButtonPtr->setBackgroundPic(CONFIGMANAGER->getResFilePath(bluetooth_path.c_str()).c_str());
+    if (mphonelinkPage2ButtonPtr) {
+        mphonelinkPage2ButtonPtr->setBackgroundPic(CONFIGMANAGER->getResFilePath(bluetooth_path.c_str()).c_str());
     }
 
     std::string sound_progress_path = _is_night_mode ?
@@ -351,18 +328,10 @@ static void onPageChange(int page) {
 }
 
 /**
- * 切换Window6和Window7窗口
+ * Window7 已删除，不再需要页面切换
  */
 static void _switch_app_window() {
-	if (mWindow6Ptr->isWndShow()) {
-		mWindow6Ptr->hideWnd();
-		mWindow7Ptr->showWnd();
-		mStatusRadioGroupPtr->setCheckedID(ID_MAIN_RadioButton1);
-	} else {
-		mWindow7Ptr->hideWnd();
-		mWindow6Ptr->showWnd();
-		mStatusRadioGroupPtr->setCheckedID(ID_MAIN_RadioButton0);
-	}
+	// Window7 removed - no-op
 }
 
 static void entry_lylink_ftu() {
@@ -488,95 +457,27 @@ static void _reverse_status_cb(int status) {
 	}, 50);
 }
 
-static void parser() {
-	std::string cur_play_file = media::music_get_current_play_file();
+// parser() 已移除 — 主界面不再显示本地音乐信息，本地音乐可在后台播放
 
-	// 如果文件没有改变且已缓存,直接使用缓存
-	if (cur_play_file == _last_play_file && _is_music_info_cached && !_cached_title.empty()) {
-		if (mtitleTextViewPtr) {
-			mtitleTextViewPtr->setText(_cached_title);
-		}
-		if (martistTextViewPtr) {
-			martistTextViewPtr->setText(_cached_artist);
-			martistTextViewPtr->setLongMode(ZKTextView::E_LONG_MODE_SCROLL_CIRCULAR);
-		}
-		return;
-	}
-
-	_last_play_file = cur_play_file;
-
-	id3_info_t info;
-	memset(&info, 0, sizeof(id3_info_t));
-	bool isTrue = media::parse_id3_info(cur_play_file.c_str(), &info);
-
-	// 安全的字符串处理并缓存
-	if (isTrue && info.title != nullptr && strlen(info.title) > 0) {
-		_cached_title = std::string(info.title);
-	} else {
-		std::string file_name = fy::files::get_file_name(cur_play_file);
-		if (isTrue && !file_name.empty()) {
-			_cached_title = file_name;
-		} else {
-			_cached_title = "Unknown";
-		}
-	}
-
-	if (isTrue && info.artist != nullptr && strlen(info.artist) > 0) {
-		_cached_artist = std::string(info.artist);
-	} else {
-		_cached_artist = "Unknown";
-	}
-
-	// 更新UI
-	if (mtitleTextViewPtr) {
-		if (_cached_title == "Unknown") {
-			mtitleTextViewPtr->setTextTr("Unknown");
-		} else {
-			mtitleTextViewPtr->setText(_cached_title);
-		}
-	}
-
-	if (martistTextViewPtr) {
-		if (_cached_artist == "Unknown") {
-			martistTextViewPtr->setTextTr("Unknown");
-		} else {
-			martistTextViewPtr->setText(_cached_artist);
-		}
-		martistTextViewPtr->setLongMode(ZKTextView::E_LONG_MODE_SCROLL_CIRCULAR);
-	}
-
-	_is_music_info_cached = true;
-}
-
-// 更新主界面音乐时间
+// 更新主界面音乐时间（蓝牙音乐）
 static void update_main_music_time() {
-    int curPos = -1;
-    int maxPos = -1;
+    bt_music_t music_info = bt::get_music_info();
+    int curPos = music_info.curpos;
+    int maxPos = music_info.duration;
 
-    if (sys::setting::get_music_play_dev() == E_AUDIO_TYPE_MUSIC) {
-        if (media::music_get_play_index() != -1) {
-            curPos = media::music_get_current_position() / 1000;
-            maxPos = media::music_get_duration() / 1000;
-        }
-    } else if (sys::setting::get_music_play_dev() == E_AUDIO_TYPE_BT_MUSIC) {
-        bt_music_t music_info = bt::get_music_info();
-        curPos = music_info.curpos;
-        maxPos = music_info.duration;
+    static int last_valid_curPos = -1;
+    static int last_valid_maxPos = -1;
 
-        static int last_valid_curPos = -1;
-        static int last_valid_maxPos = -1;
+    if (curPos >= 0) {
+        last_valid_curPos = curPos;
+    } else if (last_valid_curPos >= 0) {
+        curPos = last_valid_curPos;
+    }
 
-        if (curPos >= 0) {
-            last_valid_curPos = curPos;
-        } else if (last_valid_curPos >= 0) {
-            curPos = last_valid_curPos;
-        }
-
-        if (maxPos >= 0) {
-            last_valid_maxPos = maxPos;
-        } else if (last_valid_maxPos >= 0) {
-            maxPos = last_valid_maxPos;
-        }
+    if (maxPos >= 0) {
+        last_valid_maxPos = maxPos;
+    } else if (last_valid_maxPos >= 0) {
+        maxPos = last_valid_maxPos;
     }
 }
 
@@ -625,72 +526,26 @@ static void _bt_music_cb(bt_music_state_e state) {
 }
 
 static void _music_play_status_cb(music_play_status_e status) {
+	// 本地音乐不再驱动主界面显示，只保留后台播放逻辑
 	switch (status) {
 	case E_MUSIC_PLAY_STATUS_STARTED:
-		parser();
-		sys::setting::set_music_play_dev(E_AUDIO_TYPE_MUSIC);
-		if (mButtonPlayPtr) {
-			mButtonPlayPtr->setSelected(true);
-		}
-		if (mtitleTextViewPtr) {
-			mtitleTextViewPtr->setLongMode(ZKTextView::E_LONG_MODE_SCROLL_CIRCULAR);
-			mtitleTextViewPtr->setTextColor(0xFFFFFFFF);
-		}
-		if (mPlayProgressSeekbarPtr) {
-			mPlayProgressSeekbarPtr->setMax(media::music_get_duration() / 1000);
-			mPlayProgressSeekbarPtr->setProgress(0);
-		}
-		update_main_music_time();
+		LOGD("[main] local music started (background)");
 		break;
 	case E_MUSIC_PLAY_STATUS_RESUME:
-		parser();
-		sys::setting::set_music_play_dev(E_AUDIO_TYPE_MUSIC);
-		if (mPlayProgressSeekbarPtr) {
-			mPlayProgressSeekbarPtr->setMax(media::music_get_duration() / 1000);
-		}
-		if (mButtonPlayPtr) {
-			mButtonPlayPtr->setSelected(true);
-		}
-		if (mtitleTextViewPtr) {
-			mtitleTextViewPtr->setLongMode(ZKTextView::E_LONG_MODE_SCROLL_CIRCULAR);
-			mtitleTextViewPtr->setTextColor(0xFFFFFFFF);
-		}
-		update_main_music_time();
+		LOGD("[main] local music resumed (background)");
 		break;
 	case E_MUSIC_PLAY_STATUS_STOP:
-		if (mPlayProgressSeekbarPtr) {
-			mPlayProgressSeekbarPtr->setMax(media::music_get_duration() / 1000);
-		}
-		if (mButtonPlayPtr) {
-			mButtonPlayPtr->setSelected(false);
-		}
-		if (mtitleTextViewPtr) {
-			mtitleTextViewPtr->setLongMode(ZKTextView::E_LONG_MODE_SCROLL_CIRCULAR);
-			mtitleTextViewPtr->setTextColor(0xFFFFFFFF);
-			mtitleTextViewPtr->setTextTr("Unknown");
-		}
-		if (martistTextViewPtr) {
-			martistTextViewPtr->setTextTr("Unknown");
-		}
-		_is_music_info_cached = false;
-		_cached_title.clear();
-		_cached_artist.clear();
-		_last_play_file.clear();
+		LOGD("[main] local music stopped (background)");
 		break;
 	case E_MUSIC_PLAY_STATUS_PAUSE:
-		if (mtitleTextViewPtr) {
-			mtitleTextViewPtr->setLongMode(ZKTextView::E_LONG_MODE_NONE);
-			mtitleTextViewPtr->setTextColor(0xFFFFFFFF);
-		}
-		if (mButtonPlayPtr) {
-			mButtonPlayPtr->setSelected(false);
-		}
+		LOGD("[main] local music paused (background)");
 		break;
 	case E_MUSIC_PLAY_STATUS_COMPLETED:
-		LOGE("[main] music play completed, will play next\n");
+		LOGD("[main] local music completed, play next (background)");
 		media::music_next();
 		break;
 	case E_MUSIC_PLAY_STATUS_ERROR:
+		LOGD("[main] local music error (background)");
 		break;
 	}
 }
@@ -816,19 +671,19 @@ static void onUI_init() {
 
     _is_in_reverse_mode = false;
     _is_ui_update_paused = false;
-    _is_music_info_cached = false;
-    _background_resources_loaded = false;
+	// local music cache removed
+	// local music cache removed
     _is_exiting_reverse = false;
-    _cached_title.clear();
-    _cached_artist.clear();
-    _last_play_file.clear();
+	// local music cache removed
+	// local music cache removed
+	// local music cache removed
 
     // 初始化白天/黑夜模式
     init_day_night_mode();
 
 	mWindow6Ptr->showWnd();
-	mWindow7Ptr->hideWnd();
-	mStatusRadioGroupPtr->setCheckedID(ID_MAIN_RadioButton0);
+ // [REMOVED] mWindow7Ptr->hideWnd();
+ // [REMOVED] mStatusRadioGroupPtr->setCheckedID(ID_MAIN_RadioButton0);
 
 	sys::setting::init();
 	sys::hw::init();
@@ -891,8 +746,8 @@ static void onUI_intent(const Intent *intentPtr) {
     if (intentPtr != NULL) {
     }
 	mWindow6Ptr->showWnd();
-	mWindow7Ptr->hideWnd();
-	mStatusRadioGroupPtr->setCheckedID(ID_MAIN_RadioButton0);
+ // [REMOVED] mWindow7Ptr->hideWnd();
+ // [REMOVED] mStatusRadioGroupPtr->setCheckedID(ID_MAIN_RadioButton0);
 }
 
 static void onUI_show() {
@@ -912,32 +767,19 @@ static void onUI_show() {
         menableButtonPtr->setSelected(_is_night_mode);
     }
 
-	if (sys::setting::get_music_play_dev() == E_AUDIO_TYPE_BT_MUSIC) {
-		_update_music_info();
-		_update_music_progress();
-		if (bt::music_is_playing()) {
-			if (mButtonPlayPtr) {
-				mButtonPlayPtr->setSelected(true);
-			}
+	// musicWindow 全部跟蓝牙音乐连接
+	_update_music_info();
+	_update_music_progress();
+	if (bt::music_is_playing()) {
+		if (mButtonPlayPtr) {
+			mButtonPlayPtr->setSelected(true);
 		}
-		update_main_music_time();
-	} else if (sys::setting::get_music_play_dev() == E_AUDIO_TYPE_MUSIC) {
-		parser();
-		if (media::music_is_playing()) {
-			if (mButtonPlayPtr) {
-				mButtonPlayPtr->setSelected(true);
-			}
-			curPos = media::music_get_current_position() / 1000;
-			if (mPlayProgressSeekbarPtr) {
-				mPlayProgressSeekbarPtr->setMax(media::music_get_duration() / 1000);
-			}
-			if (mtitleTextViewPtr) {
-				mtitleTextViewPtr->setLongMode(ZKTextView::E_LONG_MODE_SCROLL_CIRCULAR);
-				mtitleTextViewPtr->setTextColor(0xFFFFFFFF);
-			}
+	} else {
+		if (mButtonPlayPtr) {
+			mButtonPlayPtr->setSelected(false);
 		}
-		update_main_music_time();
 	}
+	update_main_music_time();
     if (curPos >= 0) {
     	if (mPlayProgressSeekbarPtr) {
     		mPlayProgressSeekbarPtr->setProgress(curPos);
@@ -1002,14 +844,14 @@ static void onUI_hide() {
 	mandroidautoPage2ButtonPtr->setBackgroundPic(NULL);
 	mcarplayPage2ButtonPtr->setBackgroundPic(NULL);
 	maudiooutputButtonPtr->setBackgroundPic(NULL);
-	mmusicPage2ButtonPtr->setBackgroundPic(NULL);
-	mvideoPage2ButtonPtr->setBackgroundPic(NULL);
-	malbumPage2ButtonPtr->setBackgroundPic(NULL);
+ // [REMOVED] mmusicPage2ButtonPtr->setBackgroundPic(NULL);
+ // [REMOVED] mvideoPage2ButtonPtr->setBackgroundPic(NULL);
+ // [REMOVED] malbumPage2ButtonPtr->setBackgroundPic(NULL);
 //	msettingPage2ButtonPtr->setBackgroundPic(NULL);
-	mairplayPage2ButtonPtr->setBackgroundPic(NULL);
-	maicastPage2ButtonPtr->setBackgroundPic(NULL);
-	mbluetoothPage2ButtonPtr->setBackgroundPic(NULL);
-	mmiracastPage2ButtonPtr->setBackgroundPic(NULL);
+ // [REMOVED] mairplayPage2ButtonPtr->setBackgroundPic(NULL);
+ // [REMOVED] maicastPage2ButtonPtr->setBackgroundPic(NULL);
+	mphonelinkPage2ButtonPtr->setBackgroundPic(NULL);
+ // [REMOVED] mmiracastPage2ButtonPtr->setBackgroundPic(NULL);
 
 	mvoiceSeekBarPtr->setProgressPic(NULL);
 	mSeekBar1Ptr->setProgressPic(NULL);
@@ -1025,9 +867,9 @@ static void onUI_hide() {
 	mleftAudioButtonPtr->setBackgroundPic(NULL);
 	mleftSetButtonPtr->setBackgroundPic(NULL);
 
-	_is_music_info_cached = false;
-	_cached_title.clear();
-	_cached_artist.clear();
+	// local music cache removed
+	// local music cache removed
+	// local music cache removed
 
 	clock_gettime(CLOCK_MONOTONIC, &end_time);
 	double elapsed_time = (end_time.tv_sec - start_time.tv_sec) +
@@ -1059,14 +901,14 @@ static void onUI_quit() {
 	mandroidautoPage2ButtonPtr->setBackgroundPic(NULL);
 	mcarplayPage2ButtonPtr->setBackgroundPic(NULL);
 	maudiooutputButtonPtr->setBackgroundPic(NULL);
-	mmusicPage2ButtonPtr->setBackgroundPic(NULL);
-	mvideoPage2ButtonPtr->setBackgroundPic(NULL);
-	malbumPage2ButtonPtr->setBackgroundPic(NULL);
+ // [REMOVED] mmusicPage2ButtonPtr->setBackgroundPic(NULL);
+ // [REMOVED] mvideoPage2ButtonPtr->setBackgroundPic(NULL);
+ // [REMOVED] malbumPage2ButtonPtr->setBackgroundPic(NULL);
 //	msettingPage2ButtonPtr->setBackgroundPic(NULL);
-	mairplayPage2ButtonPtr->setBackgroundPic(NULL);
-	maicastPage2ButtonPtr->setBackgroundPic(NULL);
-	mbluetoothPage2ButtonPtr->setBackgroundPic(NULL);
-	mmiracastPage2ButtonPtr->setBackgroundPic(NULL);
+ // [REMOVED] mairplayPage2ButtonPtr->setBackgroundPic(NULL);
+ // [REMOVED] maicastPage2ButtonPtr->setBackgroundPic(NULL);
+	mphonelinkPage2ButtonPtr->setBackgroundPic(NULL);
+ // [REMOVED] mmiracastPage2ButtonPtr->setBackgroundPic(NULL);
 
 	mvoiceSeekBarPtr->setProgressPic(NULL);
 	mSeekBar1Ptr->setProgressPic(NULL);
@@ -1080,10 +922,10 @@ static void onUI_quit() {
 	mleftReverseSettingButtonPtr->setBackgroundPic(NULL);
 	mleftAudioButtonPtr->setBackgroundPic(NULL);
 	mleftSetButtonPtr->setBackgroundPic(NULL);
-	_is_music_info_cached = false;
-	_cached_title.clear();
-	_cached_artist.clear();
-	_last_play_file.clear();
+	// local music cache removed
+	// local music cache removed
+	// local music cache removed
+	// local music cache removed
 
 	_bt_remove_cb();
 }
@@ -1113,16 +955,9 @@ static bool onUI_Timer(int id) {
 	}
 		break;
 	case 1: {
-        int curPos = -1;
-        if (sys::setting::get_music_play_dev() == E_AUDIO_TYPE_MUSIC) {
-            if (media::music_is_playing()) {
-                curPos = media::music_get_current_position() / 1000;
-            }
-            if (curPos >= 0) {
-            	if (mPlayProgressSeekbarPtr) {
-            		mPlayProgressSeekbarPtr->setProgress(curPos);
-            	}
-            }
+        // musicWindow 全部跟蓝牙音乐连接
+        if (bt::music_is_playing()) {
+            _update_music_progress();
         }
         update_main_music_time();
 	}
@@ -1254,32 +1089,9 @@ static bool onmainActivityTouchEvent(const MotionEvent &ev) {
 		}
 		break;
 	case MotionEvent::E_ACTION_UP:
-	    if (allow_switch && !is_seekbar_touch && (abs(ev.mX - down_ev.mX) >= SCREEN_WIDTH / 10)) {
-	        int delta_x = ev.mX - down_ev.mX;
-	        LOGD("[main] delta_x = %d", delta_x);
-
-	        int current_id = mStatusRadioGroupPtr->getCheckedID();
-	        LOGD("[main] current_id = %d", current_id);
-
-	        bool allow_change = true;
-	        LOGD("[main] allow_change 初始值 = %d", allow_change);
-
-	        if (current_id == ID_MAIN_RadioButton0 && delta_x > 0) {
-	            allow_change = false;
-	        } else if (current_id == ID_MAIN_RadioButton1 && delta_x < 0) {
-	            allow_change = false;
-	        }
-
-	        if (allow_change) {
-	            _switch_app_window();
-	        }
-	    } else {
-	        LOGD("[main] 未进入滑动切换判断: allow_switch=%d, is_seekbar_touch=%d, 滑动距离=%d, 阈值=%d",
-	             allow_switch, is_seekbar_touch, abs(ev.mX - down_ev.mX), SCREEN_WIDTH / 10);
-	    }
-
+	    // Window7 removed - swipe to switch pages disabled
 	    allow_switch = false;
-	    is_seekbar_touch = false;  // 重置SeekBar触摸标记
+	    is_seekbar_touch = false;
 	    break;
 	default:
 		break;
@@ -1295,11 +1107,7 @@ static bool onButtonClick_NextButton(ZKButton *pButton) {
 		}
 		return false;
 	}
-	if (sys::setting::get_music_play_dev() == E_AUDIO_TYPE_MUSIC) {
-	    media::music_next(true);
-	} else if (sys::setting::get_music_play_dev() == E_AUDIO_TYPE_BT_MUSIC) {
-		bt::music_next();
-	}
+	bt::music_next();
     return false;
 }
 
@@ -1313,17 +1121,7 @@ static bool onButtonClick_ButtonPlay(ZKButton *pButton) {
 		return false;
 	}
 
-	if (sys::setting::get_music_play_dev() == E_AUDIO_TYPE_MUSIC) {
-	    if (media::music_get_play_index() == -1) {
-	    	return false;
-	    } else if (media::music_is_playing()) {
-	        media::music_pause();
-	    } else {
-	    	media::music_resume();
-	    }
-	} else if (sys::setting::get_music_play_dev() == E_AUDIO_TYPE_BT_MUSIC) {
-	    bt::music_is_playing() ? bt::music_pause() : bt::music_play();
-	}
+	bt::music_is_playing() ? bt::music_pause() : bt::music_play();
     return false;
 }
 
@@ -1335,11 +1133,7 @@ static bool onButtonClick_PrevButton(ZKButton *pButton) {
 		}
 		return false;
 	}
-	if (sys::setting::get_music_play_dev() == E_AUDIO_TYPE_MUSIC) {
-	    media::music_prev(true);
-	} else if (sys::setting::get_music_play_dev() == E_AUDIO_TYPE_BT_MUSIC) {
-		bt::music_prev();
-	}
+	bt::music_prev();
     return false;
 }
 
@@ -1353,13 +1147,14 @@ static bool onButtonClick_Setting(ZKButton *pButton) {
 }
 
 static bool onButtonClick_ToMusic(ZKButton *pButton) {
-    LOGD(" ButtonClick ToMusic !!!\n");
+    LOGD(" ButtonClick ToMusic → entering btsettingActivity (BT music)\n");
 	if (lk::is_connected()) {
 		if (mlinkTipsWindowPtr) {
 			mlinkTipsWindowPtr->showWnd();
 		}
 		return false;
 	}
+	EASYUICONTEXT->openActivity("btsettingActivity");
     return false;
 }
 
@@ -1474,18 +1269,8 @@ static bool onButtonClick_Button2(ZKButton *pButton) {
 }
 
 static void onCheckedChanged_StatusRadioGroup(ZKRadioGroup* pRadioGroup, int checkedID) {
-    LOGD(" RadioGroup StatusRadioGroup checked %d", checkedID);
-    if (checkedID == ID_MAIN_RadioButton0) {
-        if (!mWindow6Ptr->isWndShow()) {
-            mWindow7Ptr->hideWnd();
-            mWindow6Ptr->showWnd();
-        }
-    } else if (checkedID == ID_MAIN_RadioButton1) {
-        if (!mWindow7Ptr->isWndShow()) {
-            mWindow6Ptr->hideWnd();
-            mWindow7Ptr->showWnd();
-        }
-    }
+    // Window7 removed - radio group no longer toggles pages
+    LOGD("[main] StatusRadioGroup checked %d (Window7 removed, no-op)", checkedID);
 }
 
 static void onProgressChanged_PlayVolSeekBar(ZKSeekBar *pSeekBar, int progress) {
@@ -1553,15 +1338,17 @@ static bool onButtonClick_miracastPage2Button(ZKButton *pButton) {
     return false;
 }
 
-static bool onButtonClick_bluetoothPage2Button(ZKButton *pButton) {
-    LOGD(" ButtonClick bluetoothPage2Button !!!\n");
+static bool onButtonClick_phonelinkPage2Button(ZKButton *pButton) {
+    LOGD(" ButtonClick phonelinkPage2Button !!!\n");
+    // 如果已连接，直接进入投屏画面
     if (lk::is_connected()) {
-		if (mlinkTipsWindowPtr) {
-			mlinkTipsWindowPtr->showWnd();
-		}
-		return false;
-	}
-	EASYUICONTEXT->openActivity("btsettingActivity");
+        EASYUICONTEXT->openActivity("lylinkviewActivity");
+        return false;
+    }
+    // 否则进入 phonelink 选择界面
+    Intent *intent = new Intent();
+    intent->putExtra("link_mode", fy::format("%d", sys::setting::get_link_mode()));
+    EASYUICONTEXT->openActivity("phonelinkActivity", intent);
     return false;
 }
 
@@ -1691,16 +1478,13 @@ static void onProgressChanged_SeekBar1(ZKSeekBar *pSeekBar, int progress) {
 }
 
 static bool onButtonClick_toLocalmusicButton(ZKButton *pButton) {
-    LOGD(" ButtonClick toLocalmusicButton !!!\n");
+    LOGD(" ButtonClick toLocalmusicButton → entering btsettingActivity (BT music)\n");
     if (lk::is_connected()) {
 		if (mlinkTipsWindowPtr) {
 			mlinkTipsWindowPtr->showWnd();
 		}
 		return false;
 	}
-    // 只有当音源为本地音乐时才跳转到musicActivity
-    if (sys::setting::get_music_play_dev() == E_AUDIO_TYPE_MUSIC) {
-        EASYUICONTEXT->openActivity("musicActivity");
-    }
+	EASYUICONTEXT->openActivity("btsettingActivity");
     return false;
 }

@@ -549,38 +549,36 @@ static bool onnavibarActivityTouchEvent(const MotionEvent &ev) {
 	if (mphoneSeekBarPtr->isPressed()) {
 		return false;
 	}
-	SLIDEMANAGER->onTouchEvent(ev, mnavibarPtr);
+	// R2: 禁用下拉面板 — 不处理滑动事件
+	// SLIDEMANAGER->onTouchEvent(ev, mnavibarPtr);
 	static MotionEvent last;
 	switch (ev.mActionStatus) {
 	case MotionEvent::E_ACTION_DOWN:
 	        sDownTime = ev.mEventTime;
 	        sLongClickHandled = false;
-//	        LOGD("[DEBUG] ACTION_DOWN time=%ld", sDownTime);
 	        break;
 
 	    case MotionEvent::E_ACTION_MOVE:
 	        break;
 
 	    case MotionEvent::E_ACTION_UP: {
-	        SLIDEMANAGER->setCanSlide(true);
+	        SLIDEMANAGER->setCanSlide(false);  // R2: 始终禁用滑动
 
 	        long pressDuration = ev.mEventTime - sDownTime;
-//	        LOGD("[DEBUG] ACTION_UP time=%ld, duration=%ld, longClickHandled=%d",
-//	             ev.mEventTime, pressDuration, sLongClickHandled);
 	        bool isLongPress = (pressDuration >= LONG_CLICK_THRESHOLD);
 
 	        if (sLongClickHandled || isLongPress) {
-//	            LOGD("[DEBUG] Skipping set_navibar_show due to long press");
-	            sLongClickHandled = false;  // 重置标志
+	            sLongClickHandled = false;
 	        } else {
-	            if (mnavibarPtr->getPosition().mTop == 0) {
-	                sys::setting::set_navibar_show(true);
-	            }
+	            // R2: 禁用下拉面板 — 不再展开导航栏
+	            // if (mnavibarPtr->getPosition().mTop == 0) {
+	            //     sys::setting::set_navibar_show(true);
+	            // }
 	        }
 	        break;
 	    }
 	default:
-		SLIDEMANAGER->setCanSlide(true);
+		SLIDEMANAGER->setCanSlide(false);  // R2: 始终禁用滑动
 		break;
 	}
 	return false;
@@ -663,7 +661,8 @@ static bool onButtonClick_settingButton(ZKButton *pButton) {
 
 static bool onButtonClick_Button1(ZKButton *pButton) {
     LOGD(" ButtonClick Button1 !!!\n");
-    sys::setting::set_navibar_show(true);
+    // R2: 禁用下拉面板
+    // sys::setting::set_navibar_show(true);
     fold_statusbar();
     return false;
 }

@@ -4,6 +4,9 @@
 #include "tfcardActivity.h"
 
 /*TAG:GlobalVariable全局变量*/
+static ZKTextView* mTextViewalbumbuttonPtr;
+static ZKTextView* mTextViewvideobuttonPtr;
+static ZKTextView* mTextViewmusicbuttonPtr;
 static ZKTextView* mTextViewPtr;
 static ZKPointer* mloadingPointerPtr;
 static ZKWindow* mloadingPopupWindowPtr;
@@ -129,6 +132,9 @@ tfcardActivity::~tfcardActivity() {
     unregisterProtocolDataUpdateListener(onProtocolDataUpdate);
     onUI_quit();
     mActivityPtr = NULL;
+    mTextViewalbumbuttonPtr = NULL;
+    mTextViewvideobuttonPtr = NULL;
+    mTextViewmusicbuttonPtr = NULL;
     mTextViewPtr = NULL;
     mloadingPointerPtr = NULL;
     mloadingPopupWindowPtr = NULL;
@@ -149,6 +155,9 @@ const char* tfcardActivity::getAppName() const{
 //TAG:onCreate
 void tfcardActivity::onCreate() {
 	Activity::onCreate();
+    mTextViewalbumbuttonPtr = (ZKTextView*)findControlByID(ID_TFCARD_TextViewalbumbutton);
+    mTextViewvideobuttonPtr = (ZKTextView*)findControlByID(ID_TFCARD_TextViewvideobutton);
+    mTextViewmusicbuttonPtr = (ZKTextView*)findControlByID(ID_TFCARD_TextViewmusicbutton);
     mTextViewPtr = (ZKTextView*)findControlByID(ID_TFCARD_TextView);
     mloadingPointerPtr = (ZKPointer*)findControlByID(ID_TFCARD_loadingPointer);
     mloadingPopupWindowPtr = (ZKWindow*)findControlByID(ID_TFCARD_loadingPopupWindow);

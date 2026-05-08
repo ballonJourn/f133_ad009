@@ -26,6 +26,11 @@
 #include "window/ZKSlideWindow.h"
 
 /*TAG:Macro宏ID*/
+#define ID_TFCARD_TextViewalbumbutton    50004
+#define ID_TFCARD_TextViewvideobutton    50003
+#define ID_TFCARD_TextViewmusicbutton    50002
+#define ID_TFCARD_SubItem1    24007
+#define ID_TFCARD_SubItemLine    24006
 #define ID_TFCARD_TextView    50001
 #define ID_TFCARD_loadingPointer    90001
 #define ID_TFCARD_loadingPopupWindow    110004

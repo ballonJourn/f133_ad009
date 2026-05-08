@@ -4,6 +4,9 @@
 #include "phonelinkActivity.h"
 
 /*TAG:GlobalVariable全局变量*/
+static ZKTextView* mmcStepTextViewPtr;
+static ZKTextView* mapStepTextViewPtr;
+static ZKTextView* maaStepTextViewPtr;
 static ZKButton* mtipCancelButtonPtr;
 static ZKButton* mtipConfirmButtonPtr;
 static ZKTextView* mtipInfoTextPtr;
@@ -139,6 +142,9 @@ phonelinkActivity::~phonelinkActivity() {
     unregisterProtocolDataUpdateListener(onProtocolDataUpdate);
     onUI_quit();
     mActivityPtr = NULL;
+    mmcStepTextViewPtr = NULL;
+    mapStepTextViewPtr = NULL;
+    maaStepTextViewPtr = NULL;
     mtipCancelButtonPtr = NULL;
     mtipConfirmButtonPtr = NULL;
     mtipInfoTextPtr = NULL;
@@ -168,6 +174,9 @@ const char* phonelinkActivity::getAppName() const{
 //TAG:onCreate
 void phonelinkActivity::onCreate() {
 	Activity::onCreate();
+    mmcStepTextViewPtr = (ZKTextView*)findControlByID(ID_PHONELINK_mcStepTextView);
+    mapStepTextViewPtr = (ZKTextView*)findControlByID(ID_PHONELINK_apStepTextView);
+    maaStepTextViewPtr = (ZKTextView*)findControlByID(ID_PHONELINK_aaStepTextView);
     mtipCancelButtonPtr = (ZKButton*)findControlByID(ID_PHONELINK_tipCancelButton);
     mtipConfirmButtonPtr = (ZKButton*)findControlByID(ID_PHONELINK_tipConfirmButton);
     mtipInfoTextPtr = (ZKTextView*)findControlByID(ID_PHONELINK_tipInfoText);

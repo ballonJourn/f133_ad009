@@ -26,6 +26,9 @@
 #include "window/ZKSlideWindow.h"
 
 /*TAG:Macro宏ID*/
+#define ID_PHONELINK_mcStepTextView    50010
+#define ID_PHONELINK_apStepTextView    50009
+#define ID_PHONELINK_aaStepTextView    50008
 #define ID_PHONELINK_tipCancelButton    20006
 #define ID_PHONELINK_tipConfirmButton    20005
 #define ID_PHONELINK_tipInfoText    50007

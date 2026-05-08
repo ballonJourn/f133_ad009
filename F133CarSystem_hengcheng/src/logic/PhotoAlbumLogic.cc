@@ -444,7 +444,31 @@ static void onUI_init(){
 */
 static void onUI_intent(const Intent *intentPtr) {
    if (intentPtr != NULL) {
-       //TODO
+       // 从 tfcardActivity 传入的图片索引
+       std::string idx_str = intentPtr->getExtra("play_index");
+       std::string sto_str = intentPtr->getExtra("storage_type");
+       if (!idx_str.empty()) {
+           int play_idx = atoi(idx_str.c_str());
+           storage_type_e sto = E_STORAGE_TYPE_SD;
+           if (!sto_str.empty()) {
+               sto = (storage_type_e)atoi(sto_str.c_str());
+           }
+           LOGD("[PhotoAlbum] onUI_intent: play_index=%d, storage=%d", play_idx, sto);
+
+           int list_size = media::get_image_list_size(sto);
+           if (play_idx >= 0 && play_idx < list_size) {
+               albumtype = sto;
+               _select_picture_index(play_idx);
+               SetDisplayOpposite(true);
+               // 隐藏列表窗口，直接显示图片
+               if (mAlbumClassificationPtr) {
+                   mAlbumClassificationPtr->hideWnd();
+               }
+               LOGD("[PhotoAlbum] onUI_intent: showing image index=%d", play_idx);
+           } else {
+               LOGD("[PhotoAlbum] onUI_intent: play_index %d out of range (size=%d)", play_idx, list_size);
+           }
+       }
    }
 }
 

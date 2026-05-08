@@ -4,7 +4,9 @@
 #include "mainActivity.h"
 
 /*TAG:GlobalVariable全局变量*/
-static ZKButton* mmiracastPage2ButtonPtr;
+static ZKButton* mphonelinkPage2ButtonPtr;
+static ZKButton* mleftReverseSettingButtonPtr;
+static ZKButton* mleftTFCardButtonPtr;
 static ZKButton* mtoLocalmusicButtonPtr;
 static ZKSeekBar* mSeekBar1Ptr;
 static ZKTextView* miconBrightnessTextViewPtr;
@@ -14,31 +16,16 @@ static ZKTextView* mbrightnessTextViewPtr;
 static ZKTextView* mvoiceTextViewPtr;
 static ZKButton* mleftSetButtonPtr;
 static ZKButton* mleftAudioButtonPtr;
-static ZKButton* mleftVideoButtonPtr;
-static ZKButton* mleftMusicButtonPtr;
 static ZKTextView* mnaviBgPtr;
-static ZKTextView* mTextView13Ptr;
-static ZKTextView* mTextView12Ptr;
-static ZKButton* mairplayPage2ButtonPtr;
-static ZKButton* maicastPage2ButtonPtr;
-static ZKTextView* mTextView11Ptr;
-static ZKTextView* mTextView10Ptr;
-static ZKTextView* mTextView9Ptr;
-static ZKTextView* mTextView8Ptr;
-static ZKButton* malbumPage2ButtonPtr;
-static ZKButton* mvideoPage2ButtonPtr;
-static ZKButton* mmusicPage2ButtonPtr;
 static ZKTextView* mTextView7Ptr;
 static ZKTextView* mTextView5Ptr;
 static ZKTextView* mTextView4Ptr;
 static ZKTextView* mTextView1Ptr;
 static ZKButton* mandroidautoPage2ButtonPtr;
 static ZKButton* mcarplayPage2ButtonPtr;
-static ZKButton* mbluetoothPage2ButtonPtr;
 static ZKButton* menableButtonPtr;
 static ZKRadioGroup* mStatusRadioGroupPtr;
 static ZKButton* maudiooutputButtonPtr;
-static ZKWindow* mWindow7Ptr;
 static ZKWindow* mWindow6Ptr;
 static ZKTextView* mmusictextPtr;
 static ZKTextView* mmusicTextViewWindowPtr;
@@ -97,20 +84,14 @@ typedef struct {
 
 /*TAG:ButtonCallbackTab按键映射表*/
 static S_ButtonCallback sButtonCallbackTab[] = {
-    ID_MAIN_miracastPage2Button, onButtonClick_miracastPage2Button,
+    ID_MAIN_phonelinkPage2Button, onButtonClick_phonelinkPage2Button,
+    ID_MAIN_leftReverseSettingButton, onButtonClick_leftReverseSettingButton,
+    ID_MAIN_leftTFCardButton, onButtonClick_leftTFCardButton,
     ID_MAIN_toLocalmusicButton, onButtonClick_toLocalmusicButton,
     ID_MAIN_leftSetButton, onButtonClick_leftSetButton,
     ID_MAIN_leftAudioButton, onButtonClick_leftAudioButton,
-    ID_MAIN_leftVideoButton, onButtonClick_leftVideoButton,
-    ID_MAIN_leftMusicButton, onButtonClick_leftMusicButton,
-    ID_MAIN_airplayPage2Button, onButtonClick_airplayPage2Button,
-    ID_MAIN_aicastPage2Button, onButtonClick_aicastPage2Button,
-    ID_MAIN_albumPage2Button, onButtonClick_albumPage2Button,
-    ID_MAIN_videoPage2Button, onButtonClick_videoPage2Button,
-    ID_MAIN_musicPage2Button, onButtonClick_musicPage2Button,
     ID_MAIN_androidautoPage2Button, onButtonClick_androidautoPage2Button,
     ID_MAIN_carplayPage2Button, onButtonClick_carplayPage2Button,
-    ID_MAIN_bluetoothPage2Button, onButtonClick_bluetoothPage2Button,
     ID_MAIN_enableButton, onButtonClick_enableButton,
     ID_MAIN_audiooutputButton, onButtonClick_audiooutputButton,
     ID_MAIN_ToMusic, onButtonClick_ToMusic,
@@ -202,7 +183,9 @@ mainActivity::~mainActivity() {
     unregisterProtocolDataUpdateListener(onProtocolDataUpdate);
     onUI_quit();
     mActivityPtr = NULL;
-    mmiracastPage2ButtonPtr = NULL;
+    mphonelinkPage2ButtonPtr = NULL;
+    mleftReverseSettingButtonPtr = NULL;
+    mleftTFCardButtonPtr = NULL;
     mtoLocalmusicButtonPtr = NULL;
     mSeekBar1Ptr = NULL;
     miconBrightnessTextViewPtr = NULL;
@@ -212,31 +195,16 @@ mainActivity::~mainActivity() {
     mvoiceTextViewPtr = NULL;
     mleftSetButtonPtr = NULL;
     mleftAudioButtonPtr = NULL;
-    mleftVideoButtonPtr = NULL;
-    mleftMusicButtonPtr = NULL;
     mnaviBgPtr = NULL;
-    mTextView13Ptr = NULL;
-    mTextView12Ptr = NULL;
-    mairplayPage2ButtonPtr = NULL;
-    maicastPage2ButtonPtr = NULL;
-    mTextView11Ptr = NULL;
-    mTextView10Ptr = NULL;
-    mTextView9Ptr = NULL;
-    mTextView8Ptr = NULL;
-    malbumPage2ButtonPtr = NULL;
-    mvideoPage2ButtonPtr = NULL;
-    mmusicPage2ButtonPtr = NULL;
     mTextView7Ptr = NULL;
     mTextView5Ptr = NULL;
     mTextView4Ptr = NULL;
     mTextView1Ptr = NULL;
     mandroidautoPage2ButtonPtr = NULL;
     mcarplayPage2ButtonPtr = NULL;
-    mbluetoothPage2ButtonPtr = NULL;
     menableButtonPtr = NULL;
     mStatusRadioGroupPtr = NULL;
     maudiooutputButtonPtr = NULL;
-    mWindow7Ptr = NULL;
     mWindow6Ptr = NULL;
     mmusictextPtr = NULL;
     mmusicTextViewWindowPtr = NULL;
@@ -267,7 +235,9 @@ const char* mainActivity::getAppName() const{
 //TAG:onCreate
 void mainActivity::onCreate() {
 	Activity::onCreate();
-    mmiracastPage2ButtonPtr = (ZKButton*)findControlByID(ID_MAIN_miracastPage2Button);
+    mphonelinkPage2ButtonPtr = (ZKButton*)findControlByID(ID_MAIN_phonelinkPage2Button);
+    mleftReverseSettingButtonPtr = (ZKButton*)findControlByID(ID_MAIN_leftReverseSettingButton);
+    mleftTFCardButtonPtr = (ZKButton*)findControlByID(ID_MAIN_leftTFCardButton);
     mtoLocalmusicButtonPtr = (ZKButton*)findControlByID(ID_MAIN_toLocalmusicButton);
     mSeekBar1Ptr = (ZKSeekBar*)findControlByID(ID_MAIN_SeekBar1);if(mSeekBar1Ptr!= NULL){mSeekBar1Ptr->setSeekBarChangeListener(this);}
     miconBrightnessTextViewPtr = (ZKTextView*)findControlByID(ID_MAIN_iconBrightnessTextView);
@@ -277,31 +247,16 @@ void mainActivity::onCreate() {
     mvoiceTextViewPtr = (ZKTextView*)findControlByID(ID_MAIN_voiceTextView);
     mleftSetButtonPtr = (ZKButton*)findControlByID(ID_MAIN_leftSetButton);
     mleftAudioButtonPtr = (ZKButton*)findControlByID(ID_MAIN_leftAudioButton);
-    mleftVideoButtonPtr = (ZKButton*)findControlByID(ID_MAIN_leftVideoButton);
-    mleftMusicButtonPtr = (ZKButton*)findControlByID(ID_MAIN_leftMusicButton);
     mnaviBgPtr = (ZKTextView*)findControlByID(ID_MAIN_naviBg);
-    mTextView13Ptr = (ZKTextView*)findControlByID(ID_MAIN_TextView13);
-    mTextView12Ptr = (ZKTextView*)findControlByID(ID_MAIN_TextView12);
-    mairplayPage2ButtonPtr = (ZKButton*)findControlByID(ID_MAIN_airplayPage2Button);
-    maicastPage2ButtonPtr = (ZKButton*)findControlByID(ID_MAIN_aicastPage2Button);
-    mTextView11Ptr = (ZKTextView*)findControlByID(ID_MAIN_TextView11);
-    mTextView10Ptr = (ZKTextView*)findControlByID(ID_MAIN_TextView10);
-    mTextView9Ptr = (ZKTextView*)findControlByID(ID_MAIN_TextView9);
-    mTextView8Ptr = (ZKTextView*)findControlByID(ID_MAIN_TextView8);
-    malbumPage2ButtonPtr = (ZKButton*)findControlByID(ID_MAIN_albumPage2Button);
-    mvideoPage2ButtonPtr = (ZKButton*)findControlByID(ID_MAIN_videoPage2Button);
-    mmusicPage2ButtonPtr = (ZKButton*)findControlByID(ID_MAIN_musicPage2Button);
     mTextView7Ptr = (ZKTextView*)findControlByID(ID_MAIN_TextView7);
     mTextView5Ptr = (ZKTextView*)findControlByID(ID_MAIN_TextView5);
     mTextView4Ptr = (ZKTextView*)findControlByID(ID_MAIN_TextView4);
     mTextView1Ptr = (ZKTextView*)findControlByID(ID_MAIN_TextView1);
     mandroidautoPage2ButtonPtr = (ZKButton*)findControlByID(ID_MAIN_androidautoPage2Button);
     mcarplayPage2ButtonPtr = (ZKButton*)findControlByID(ID_MAIN_carplayPage2Button);
-    mbluetoothPage2ButtonPtr = (ZKButton*)findControlByID(ID_MAIN_bluetoothPage2Button);
     menableButtonPtr = (ZKButton*)findControlByID(ID_MAIN_enableButton);
     mStatusRadioGroupPtr = (ZKRadioGroup*)findControlByID(ID_MAIN_StatusRadioGroup);if(mStatusRadioGroupPtr!= NULL){mStatusRadioGroupPtr->setCheckedChangeListener(this);}
     maudiooutputButtonPtr = (ZKButton*)findControlByID(ID_MAIN_audiooutputButton);
-    mWindow7Ptr = (ZKWindow*)findControlByID(ID_MAIN_Window7);
     mWindow6Ptr = (ZKWindow*)findControlByID(ID_MAIN_Window6);
     mmusictextPtr = (ZKTextView*)findControlByID(ID_MAIN_musictext);
     mmusicTextViewWindowPtr = (ZKTextView*)findControlByID(ID_MAIN_musicTextViewWindow);

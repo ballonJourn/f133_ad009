@@ -27,7 +27,9 @@
 #include "window/ZKSlideWindow.h"
 
 /*TAG:Macro宏ID*/
-#define ID_MAIN_miracastPage2Button    20009
+#define ID_MAIN_phonelinkPage2Button    20003
+#define ID_MAIN_leftReverseSettingButton    20013
+#define ID_MAIN_leftTFCardButton    20012
 #define ID_MAIN_toLocalmusicButton    20016
 #define ID_MAIN_SeekBar1    91004
 #define ID_MAIN_iconBrightnessTextView    50024
@@ -37,20 +39,7 @@
 #define ID_MAIN_voiceTextView    50022
 #define ID_MAIN_leftSetButton    20015
 #define ID_MAIN_leftAudioButton    20014
-#define ID_MAIN_leftVideoButton    20013
-#define ID_MAIN_leftMusicButton    20012
 #define ID_MAIN_naviBg    50020
-#define ID_MAIN_TextView13    50019
-#define ID_MAIN_TextView12    50017
-#define ID_MAIN_airplayPage2Button    20011
-#define ID_MAIN_aicastPage2Button    20010
-#define ID_MAIN_TextView11    50016
-#define ID_MAIN_TextView10    50014
-#define ID_MAIN_TextView9    50012
-#define ID_MAIN_TextView8    50011
-#define ID_MAIN_albumPage2Button    20008
-#define ID_MAIN_videoPage2Button    20007
-#define ID_MAIN_musicPage2Button    20001
 #define ID_MAIN_TextView7    50010
 #define ID_MAIN_TextView5    50009
 #define ID_MAIN_TextView4    50005
@@ -58,12 +47,10 @@
 #define ID_MAIN_androidautoPage2Button    20006
 #define ID_MAIN_audiooutputButton    20005
 #define ID_MAIN_carplayPage2Button    20004
-#define ID_MAIN_bluetoothPage2Button    20003
 #define ID_MAIN_enableButton    20002
 #define ID_MAIN_RadioButton1    22002
 #define ID_MAIN_RadioButton0    22001
 #define ID_MAIN_StatusRadioGroup    94001
-#define ID_MAIN_Window7    110003
 #define ID_MAIN_Window6    110002
 #define ID_MAIN_musictext    50018
 #define ID_MAIN_musicTextViewWindow    50008
