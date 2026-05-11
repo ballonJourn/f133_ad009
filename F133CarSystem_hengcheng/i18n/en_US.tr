@@ -102,7 +102,8 @@
     <string name="Conn_tips">Tip:</string>
     <string name="cp_help">CarPlay connection help</string>
     <string name="cp_step1">1. Use an iPhone to connect to Bluetooth,the Bluetooth name is:</string>
-    <string name="cp_step2">2. When the pop-up window on the phone shows &quot;Use iPhone for Carplay car?&quot;, select the &quot;Use Carplay car option&quot;</string>
+    <string name="cp_step2">2. When the pop-up window on the phone shows &quot;Use iPhone for Carplay car?&quot;, 
+select the &quot;Use Carplay car option&quot;</string>
     <string name="cp_tips1">1. The waiting time for the first connection is relatively long</string>
     <string name="cp_tips2">2. Only supports Apple phones</string>
     <string name="cp_tips3">3. After successful connection, Bluetooth will automatically disconnect</string>

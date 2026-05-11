@@ -153,6 +153,39 @@ static void _select_link_mode(link_mode_e mode) {
 	}
 }
 
+// ==================== 帮助步骤文字 (参照 linkhelpLogic.cc _update_layout) ====================
+
+static void _update_step_text() {
+	std::string bt_name = sys::setting::get_bt_name();
+	std::string dev_name = sys::setting::get_dev_name();
+
+	// CarPlay 步骤文字
+	std::string cpStep = LTOV("cp_step1") + bt_name + "\n\n"
+					   + LTOV("cp_step2");
+
+	// Android Auto 步骤文字
+	std::string aaStep = LTOV("aa_step1") + "\n\n"
+					   + LTOV("aa_step2") + bt_name;
+
+	// AirPlay 步骤文字
+	std::string apStep = LTOV("ap_step1") + dev_name + "\n\n"
+					   + LTOV("ap_step2") + std::string("12345678") + "\n\n"
+					   + LTOV("ap_step3") + dev_name;
+
+	// Miracast 步骤文字
+	std::string mcStep = LTOV("mc_step1") + "\n\n"
+					   + LTOV("mc_step2") + "\n\n"
+					   + LTOV("mc_step3") + dev_name;
+
+	if (mcpStepTextViewPtr) mcpStepTextViewPtr->setText(cpStep);
+	if (maaStepTextViewPtr) maaStepTextViewPtr->setText(aaStep);
+	if (mapStepTextViewPtr) mapStepTextViewPtr->setText(apStep);
+	if (mmcStepTextViewPtr) mmcStepTextViewPtr->setText(mcStep);
+
+	// cpTipTextView 也设置帮助标题（与 linkhelp 保持一致）
+	if (mcpTipTextViewPtr) mcpTipTextViewPtr->setText(LTOV("cp_help"));
+}
+
 // ==================== 生命周期 ====================
 
 static S_ACTIVITY_TIMEER REGISTER_ACTIVITY_TIMER_TAB[] = {
@@ -164,6 +197,9 @@ static void onUI_init() {
 	_s_target_link_mode = sys::setting::get_link_mode();
 	LOGD("[phonelink]   saved link_mode: %s (%d)",
 		sys::setting::get_link_mode_str(_s_target_link_mode), _s_target_link_mode);
+
+	// 设置各模式的帮助步骤文字
+	_update_step_text();
 }
 
 static void onUI_intent(const Intent *intentPtr) {
