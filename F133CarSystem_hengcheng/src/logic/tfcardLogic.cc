@@ -247,6 +247,21 @@ static void _switch_nav(nav_type_e nav) {
 
 // ==================== 扫描回调 ====================
 
+/*
+ * [FIX] _media_scan_cb 由 media_context 的 handler 线程调用，
+ * 调用时 _s_media_scan_mutex 处于锁定状态。
+ * 如果在此回调中直接调用 _refresh_all() → media::get_audio_list_size()，
+ * 后者会再次尝试获取同一把非递归锁 → 自死锁，系统卡死。
+ *
+ * 修复：回调中只设置标志 + 注册短延时定时器，
+ * 让 _refresh_all() 在 UI 线程的 onUI_Timer 中执行（此时锁已释放）。
+ */
+
+// 标记是否有挂起的扫描完成事件需要处理
+static bool _s_scan_finish_pending = false;
+
+#define SCAN_FINISH_TIMER  4
+
 static void _media_scan_cb(const char *dir, storage_type_e type, bool started) {
 	if (type != _s_storage) {
 		return;
@@ -254,11 +269,19 @@ static void _media_scan_cb(const char *dir, storage_type_e type, bool started) {
 
 	if (started) {
 		LOGD("[tfcard] scan started: %s", dir);
-		_show_loading();
+		_s_scan_finish_pending = false;
+		// _show_loading() 操作UI控件，必须确保安全
+		// 在handler线程中showWnd一般可用，但标记延迟更安全
+		if (mloadingPopupWindowPtr) {
+			mloadingPopupWindowPtr->showWnd();
+		}
 	} else {
-		LOGD("[tfcard] scan finished: %s", dir);
-		_refresh_all();
-		_hide_loading();
+		LOGD("[tfcard] scan finished: %s — scheduling UI refresh via timer", dir);
+		_s_scan_finish_pending = true;
+		// 延迟 50ms 在 UI 线程中刷新，避免在持有 _s_media_scan_mutex 时重入
+		if (mActivityPtr) {
+			mActivityPtr->registerUserTimer(SCAN_FINISH_TIMER, 50);
+		}
 	}
 }
 
@@ -338,6 +361,7 @@ static void onUI_hide() {
 
 static void onUI_quit() {
 	LOGD("[tfcard] onUI_quit");
+	_s_scan_finish_pending = false;
 	media::remove_scan_cb(_media_scan_cb);
 	_s_folder_list.clear();
 	_s_filtered_file_indices.clear();
@@ -367,6 +391,14 @@ static bool onUI_Timer(int id) {
 			_nav_type_str(_s_current_nav));
 		_refresh_all();
 		_hide_loading();
+		return false;
+	case SCAN_FINISH_TIMER:
+		LOGD("[tfcard] SCAN_FINISH_TIMER fired — deferred refresh after scan complete");
+		if (_s_scan_finish_pending) {
+			_s_scan_finish_pending = false;
+			_refresh_all();
+			_hide_loading();
+		}
 		return false;
 	default:
 		break;

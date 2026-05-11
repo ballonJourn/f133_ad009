@@ -379,6 +379,11 @@ static void _lylink_callback(LYLINKAPI_EVENT evt, int para0, void *para1) {
 			}
 			entry_lylink_ftu();
 		}
+		// BUG FIX: Android Auto 连接建立时也需要进入投屏界面
+		// 与 CarPlay (WIFICP) 不同，AA 不需要关闭蓝牙（AA 依赖 BT 做配对/通话）
+		if (LINK_TYPE_WIFIAUTO == para0 || LINK_TYPE_USBAUTO == para0) {
+			entry_lylink_ftu();
+		}
 		if(sys::setting::get_sound_mode() == E_SOUND_MODE_LINK){
 			if(media::music_is_playing()){
 				media::music_pause();
@@ -390,6 +395,13 @@ static void _lylink_callback(LYLINKAPI_EVENT evt, int para0, void *para1) {
 	case LYLINK_LINK_DISCONN:
 		LOGD("LYLINK_LINK_DISCONN........... %s", lk::_link_type_to_str((LYLINK_TYPE_E) para0));
 		if (LINK_TYPE_AIRPLAY == para0 || LINK_TYPE_MIRACAST == para0 || LINK_TYPE_WIFILY == para0 || LINK_TYPE_WIFICP == para0) {
+			if (!bt::is_on()) {
+				bt::power_on();
+			}
+		}
+		// BUG FIX: Android Auto 断连后也需要查询蓝牙状态并更新 UI
+		// AA 断连时蓝牙本应是开着的（AA 需要 BT），但仍需确保状态正确
+		if (LINK_TYPE_WIFIAUTO == para0 || LINK_TYPE_USBAUTO == para0) {
 			if (!bt::is_on()) {
 				bt::power_on();
 			}
