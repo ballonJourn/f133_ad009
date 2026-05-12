@@ -10,6 +10,8 @@
 #include "media/music_player.h"
 #include "system/setting.h"
 #include "link/context.h"
+#include "bt/context.h"
+#include "fy/format.hpp"
 #include <set>
 #include <algorithm>
 
@@ -474,22 +476,66 @@ static void onListItemClick_ListView1(ZKListView *pListView, int index, int id) 
 		return;
 	}
 
+	/*
+	 * [FIX BUG-05] 蓝牙通话中禁止启动音乐/视频播放
+	 * 与 musicLogic、videoLogic 的同类保护保持一致
+	 */
+	if (bt::is_calling()) {
+		LOGD("[tfcard]   bt calling, ignoring file click");
+		return;
+	}
+
 	switch (_s_current_nav) {
 	case E_NAV_MUSIC: {
 		LOGD("[tfcard]   → opening musicActivity, play index=%d", real_index);
 		sys::setting::set_music_play_dev(E_AUDIO_TYPE_MUSIC);
-		media::music_play(_s_storage, real_index);
+		/*
+		 * [FIX] 点击同一首歌时 resume 而非重新播放
+		 * 原逻辑：无条件调用 music_play() → 每次都从头播放
+		 * 修复后：判断 play_index 和 storage 是否匹配当前正在播放的曲目
+		 *   - 匹配 → music_resume()（从暂停位置继续）
+		 *   - 不匹配 → music_play()（切歌，从头播放）
+		 * 与 musicLogic.cc onListItemClick_musicListView 保持一致
+		 */
+		if (media::music_get_play_index() == real_index &&
+			_s_storage == E_STORAGE_TYPE_SD) {
+			// 同一首歌：恢复播放（如果已暂停）或保持当前状态
+			if (!media::music_is_playing()) {
+				media::music_resume();
+			}
+		} else {
+			// 不同歌曲：从头播放
+			media::music_play(_s_storage, real_index);
+		}
 		EASYUICONTEXT->openActivity("musicActivity");
 		break;
 	}
 	case E_NAV_VIDEO: {
-		LOGD("[tfcard]   → opening videoActivity");
-		EASYUICONTEXT->openActivity("videoActivity");
+		LOGD("[tfcard]   → opening videoActivity, play index=%d", real_index);
+		/*
+		 * [FIX] 通过 Intent 传递播放索引和存储类型给 videoActivity
+		 * 原逻辑：仅 openActivity，不传参 → 打开列表但不播放选中视频
+		 * 修复后：构造 Intent 传入 play_index + storage_type
+		 *   videoLogic.cc onUI_intent 已有对应接收逻辑（第401-429行）
+		 *   可直接匹配，无需修改 videoLogic
+		 */
+		Intent *intent = new Intent();
+		intent->putExtra("play_index", fy::format("%d", real_index));
+		intent->putExtra("storage_type", fy::format("%d", (int)_s_storage));
+		EASYUICONTEXT->openActivity("videoActivity", intent);
 		break;
 	}
 	case E_NAV_PHOTO: {
-		LOGD("[tfcard]   → opening PhotoAlbumActivity");
-		EASYUICONTEXT->openActivity("PhotoAlbumActivity");
+		LOGD("[tfcard]   → opening PhotoAlbumActivity, index=%d", real_index);
+		/*
+		 * [FIX] 通过 Intent 传递图片索引给相册界面
+		 * 便于后续相册界面接收 intent 后直接定位到选中图片
+		 * 目前 PhotoAlbumActivity 如未实现 intent 接收则忽略此参数，无副作用
+		 */
+		Intent *intent = new Intent();
+		intent->putExtra("play_index", fy::format("%d", real_index));
+		intent->putExtra("storage_type", fy::format("%d", (int)_s_storage));
+		EASYUICONTEXT->openActivity("PhotoAlbumActivity", intent);
 		break;
 	}
 	}
